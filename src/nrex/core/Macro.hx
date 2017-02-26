@@ -24,7 +24,7 @@ class Macro{
 			var type=Context.getType(name);
 			groupTypes.push(type);
 
-			fields.push({ //create new field
+			fields.push({ //create a new group field
 				name: makeVarName(name),
 				pos: Context.currentPos(),
 				access: [APublic],
@@ -33,6 +33,51 @@ class Macro{
 		});
 
 		currentClass.meta.remove("has"); //remove metadata
+
+		return fields;
+	}
+
+	macro public static function buildGroup(): Array<Field>{
+		var fields: Array<Field>=Context.getBuildFields();
+
+		//if user has not defined a constructor
+		if(!fields.exists(function(field){return field.name=="new";})){
+
+			//get constructor arguments first
+			var constrArgs: Array<FunctionArg>=[];
+			var exprs: Array<Expr>=[];
+
+			//add super constructor call
+			exprs.push(macro super(owner));
+
+			for(field in fields){
+				switch(field.kind){
+					case(FVar(type, _)): //only if field is a var, add it to constructor arguments
+						constrArgs.push({
+							name: field.name,
+							type: type,
+							opt: false
+						});
+						if(field.name!="owner"){
+							exprs.push(macro $p{["this", field.name]}=$i{field.name});
+						}
+					default:
+				}
+			}
+
+			//add constructor to fields
+			fields.push({
+				name: "new",
+				pos: Context.currentPos(),
+				access: [APublic],
+				kind: FFun({
+					args: constrArgs,
+					expr: macro $b{exprs},
+					params: [],
+					ret: null
+				})
+			});
+		}
 
 		return fields;
 	}

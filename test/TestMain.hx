@@ -2,7 +2,7 @@ import haxe.unit.TestRunner;
 import haxe.unit.TestCase;
 
 import nrex.core.Entity;
-
+import nrex.core.Group;
 import nrex.core.Macro;
 
 //import haxe.io.Bytes;
@@ -48,14 +48,20 @@ class TestAddingFieldsForGroups extends TestCase{
 	}
 }
 
-class HpGroup{
+class HpGroup extends Group{
 	public var hp: IntWrapper;
 	public var maxHp: IntWrapper;
+
+	public function new(owner: Entity, maxHp: IntWrapper){
+		super(owner);
+		this.maxHp=maxHp;
+		this.hp=maxHp;
+	}
 }
 
-class PosGroup{
-	public var x: Float;
-	public var y: Float;
+class PosGroup extends Group{
+	public var x: IntWrapper;
+	public var y: IntWrapper;
 }
 
 @has("HpGroup", "PosGroup", "haxe.io.Bytes")
