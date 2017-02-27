@@ -43,24 +43,22 @@ class Macro{
 		//if user has not defined a constructor
 		if(!fields.exists(function(field){return field.name=="new";})){
 
-			//get constructor arguments first
-			var constrArgs: Array<FunctionArg>=[];
-			var exprs: Array<Expr>=[];
+			var constrArgs: Array<FunctionArg>=[{name: "owner", type: "Entity".toComplex(), opt: false}]; //TODO: consider fetching all inherited fields, if want to support subclasses
+			var exprs: Array<Expr>=[macro super(owner)]; //add super constructor call
 
-			//add super constructor call
-			exprs.push(macro super(owner));
-
+			//for every field: if its a var, add it to arguments and add an assignment to constructor
 			for(field in fields){
+
 				switch(field.kind){
-					case(FVar(type, _)): //only if field is a var, add it to constructor arguments
-						constrArgs.push({
+					case(FVar(type, _)):
+						constrArgs.push({ //create constructor arg
 							name: field.name,
 							type: type,
 							opt: false
 						});
-						if(field.name!="owner"){
+						//if(field.name!="owner"){ //create assignment
 							exprs.push(macro $p{["this", field.name]}=$i{field.name});
-						}
+						//}
 					default:
 				}
 			}

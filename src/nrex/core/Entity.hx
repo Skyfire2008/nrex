@@ -10,4 +10,8 @@ class Entity{
 	public function new(){
 		this.id=currentId++;
 	}
+
+	public inline function equals(other: Entity): Bool{
+		return this.id==other.id;
+	}
 }
