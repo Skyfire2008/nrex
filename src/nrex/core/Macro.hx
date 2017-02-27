@@ -1,5 +1,7 @@
 package nrex.core;
 
+import haxe.ds.StringMap;
+
 import haxe.macro.Context;
 import haxe.macro.Expr;
 import haxe.macro.Type;
@@ -13,8 +15,22 @@ using StringTools;
 
 class Macro{
 
+	/**
+	 * Maps group to fields, that should be included in an entity that has the given group
+	 * so that they can be calculated once per group
+	 */
+	private static var groupFields: StringMap<Array<Field>>=new StringMap<Array<Field>>();
+
+	/**
+	 * Builds an entity:
+	 * 		1)Every group an entity has is added as a field with getter
+	 * 		2)Variable fields of groups that entity has are combined together
+	 * 		if there are several vars with same name, the first one counts
+	 * 		so that the user can define them themself
+	 */
 	macro public static function buildEntity(): Array<Field>{
-		var fields: Array<Field>=Context.getBuildFields();
+		var fields: Array<Field>=Context.getBuildFields(); 
+
 		var currentClass=Context.getLocalClass().get();
 
 		//extract names of groups contained from metadata and add a field for every group to entity
@@ -32,11 +48,17 @@ class Macro{
 			});
 		});
 
+		//add 
+
 		currentClass.meta.remove("has"); //remove metadata
 
 		return fields;
 	}
 
+	/**
+	 * Builds a group:
+	 * 		1)Adds a constructor, assigning values to every var of the group
+	 */
 	macro public static function buildGroup(): Array<Field>{
 		var fields: Array<Field>=Context.getBuildFields();
 
@@ -80,6 +102,18 @@ class Macro{
 		return fields;
 	}
 
+	/**
+	 * Generates names for fields, containing entities' groups.
+	 * 
+	 * Names are generated from group names according to following rules:
+	 * 		1)Every letter after a period becomes capitalized
+	 * 		2)Periods are removed
+	 * 		3)First letter is changed to lowercase
+	 * 	
+	 * Examples:
+	 * 		"MoveGroup" -> "moveGroup"
+	 * 		"nrex.groups.MoveGroup" -> "nrexGroupsMoveGroup"
+	 */
 	public static inline function makeVarName(groupName: String): String{
 		var nameBuf: StringBuf=new StringBuf();
 
