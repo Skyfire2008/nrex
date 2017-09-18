@@ -33,12 +33,42 @@ class Macro{
 
 		var currentClass=Context.getLocalClass().get();
 
-		//extract names of groups contained from metadata and add a field for every group to entity
+		//EXTRACT GROUP NAMES AND FOR EVERY GROUP...
 		var groupTypes: Array<Type>=[];
 		currentClass.meta.extract("has")[0].params.iter(function(param){
 			var name=param.getValue();
 			var type=Context.getType(name);
+
+			//TODO: will I need this?
 			groupTypes.push(type);
+
+			//get current group fields
+			var currentFields: Array<Field>=groupFields.get(name);
+			if(currentFields==null){ //if no fields for current group, add them
+				var tempFields=type.getClass().fields.get();
+				
+				//filter out non-normal-access non-variables
+				tempFields=tempFields.filter(function(f){
+					switch(f.kind){
+						case FVar(AccNormal, AccNormal): return true;
+						default: return false;
+					}
+				});
+
+				//convert class fields to build fields and add them
+				currentFields=new Array<Field>();
+				tempFields.iter(function(f){
+					currentFields.push(cf2f(f));
+				});
+
+				groupFields.set(name, currentFields);
+
+			}
+
+			//add group fields to entity
+			currentFields.iter(function(f){
+				fields.push(f);
+			});
 
 			fields.push({ //create a new group field
 				name: makeVarName(name),
@@ -102,6 +132,22 @@ class Macro{
 		return fields;
 	}
 
+	/**
+	 * Converts ClassFields to build Fields
+	 */
+	private static function cf2f(field: ClassField): Field{
+		//TODO: add checks and shit here
+
+		var result: Field={
+			access: [APublic],
+			kind: FVar(field.type.toComplexType()),
+			name: field.name,
+			pos: Context.currentPos()
+		};
+		return result;
+	}
+
+	//TODO: instead consider using name of the class
 	/**
 	 * Generates names for fields, containing entities' groups.
 	 * 

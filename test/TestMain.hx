@@ -91,7 +91,7 @@ class PosGroup extends Group{
 
 @has("HpGroup", "PosGroup", "haxe.io.Bytes")
 class SimpleEntity extends Entity{
-
+	
 }
 
 
