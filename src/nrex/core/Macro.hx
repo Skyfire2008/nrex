@@ -24,8 +24,8 @@ class Macro{
 	/**
 	 * Builds an entity:
 	 * 		1)Every group an entity has is added as a field with getter
-	 * 		2)Variable fields of groups that entity has are combined together
-	 * 		if there are several vars with same name, the first one counts
+	 * 		2)Components(variable fields) of groups that entity has are combined together
+	 * 		if there are several vars with same name, the last one counts
 	 * 		so that the user can define them themself
 	 */
 	macro public static function buildEntity(): Array<Field>{
@@ -33,8 +33,10 @@ class Macro{
 
 		var currentClass=Context.getLocalClass().get();
 
-		//EXTRACT GROUP NAMES AND FOR EVERY GROUP...
 		var groupTypes: Array<Type>=[];
+		var components: StringMap<Field>=new StringMap<Field>();
+
+		//FOR EVERY GROUP, ADD THE GROUP FIELD TO ENTITY AND COMPONENTS TO THE COMPONENTS SET
 		currentClass.meta.extract("has")[0].params.iter(function(param){
 			var name=param.getValue();
 			var type=Context.getType(name);
@@ -42,9 +44,9 @@ class Macro{
 			//TODO: will I need this?
 			groupTypes.push(type);
 
-			//get current group fields
-			var currentFields: Array<Field>=groupFields.get(name);
-			if(currentFields==null){ //if no fields for current group, add them
+			//get current group's components
+			var currentComponents: Array<Field>=groupFields.get(name);
+			if(currentComponents==null){ //if no components for current group found, add them
 				var tempFields=type.getClass().fields.get();
 				
 				//filter out non-normal-access non-variables
@@ -56,18 +58,18 @@ class Macro{
 				});
 
 				//convert class fields to build fields and add them
-				currentFields=new Array<Field>();
+				currentComponents=new Array<Field>();
 				tempFields.iter(function(f){
-					currentFields.push(cf2f(f));
+					currentComponents.push(cf2f(f));
 				});
 
-				groupFields.set(name, currentFields);
+				groupFields.set(name, currentComponents);
 
 			}
 
-			//add group fields to entity
-			currentFields.iter(function(f){
-				fields.push(f);
+			//add up all distinct components
+			currentComponents.iter(function(f){
+				components.set(f.name, f);
 			});
 
 			fields.push({ //create a new group field
@@ -76,6 +78,11 @@ class Macro{
 				access: [APublic],
 				kind: FVar(type.toComplexType(), null)
 			});
+		});
+
+		//add distinct components to the entity
+		components.iter(function(comp){
+			fields.push(comp);
 		});
 
 		//add 
