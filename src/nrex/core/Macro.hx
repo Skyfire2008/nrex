@@ -67,10 +67,33 @@ class Macro{
 
 			}
 
-			//add up all distinct components
+			//call arguments for the group constructor for getter
+			var constrArgs: Array<Expr>=[macro this];
+
+			//for every component...
 			currentComponents.iter(function(f){
+
+				//add it to the set
 				components.set(f.name, f);
+
+				//add the field to the call args
+				constrArgs.push(macro $i{f.name});
+
 			});
+
+			//create a getter for the group field
+			var tp: TypePath=null;
+			switch(type.toComplexType()){
+				case TPath(p):
+					tp=p;
+				default:
+			}
+
+			var getter: Function={
+				ret: type.toComplexType(),
+				expr: macro ENew(tp, constrArgs),
+				args: null
+			};
 
 			fields.push({ //create a new group field
 				name: makeVarName(name),
