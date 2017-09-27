@@ -89,18 +89,38 @@ class Macro{
 				default:
 			}
 
-			var getter: Function={
-				ret: type.toComplexType(),
-				expr: macro ENew(tp, constrArgs),
-				args: null
-			};
-
 			fields.push({ //create a new group field
 				name: makeVarName(name),
 				pos: Context.currentPos(),
 				access: [APublic],
-				kind: FVar(type.toComplexType(), null)
+				//kind: FVar(type.toComplexType(), null)
+				kind: FProp("get", "null", type.toComplexType(), null)
 			});
+
+			fields.push({
+				name: 'get_${makeVarName(name)}',
+				pos: Context.currentPos(),
+				access: [APrivate, AInline],
+				kind: FFun({
+					ret: type.toComplexType(),
+					expr: {
+						expr: EReturn({
+							expr: ENew(tp, constrArgs), 
+							pos: Context.currentPos()
+						}),
+						pos: Context.currentPos()
+					},
+					/*expr: EReturn({
+						expr: {
+							expr: ENew(tp, constrArgs), 
+							pos: Context.currentPos()
+						}, 
+						pos: Context.currentPos()
+					}),*/
+					args: []
+				})
+			});
+
 		});
 
 		//add distinct components to the entity
