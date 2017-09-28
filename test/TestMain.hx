@@ -17,6 +17,7 @@ class TestMain{
 		runner.add(new TestMakeVarName());
 		runner.add(new TestAddingFieldsForGroups());
 		runner.add(new TestAddingConstructorsToGroups());
+		runner.add(new TestAddingGroupGetters());
 
 		runner.run();
 	}
@@ -64,7 +65,6 @@ class TestAddingFieldsForGroups extends TestCase{
 		try{
 			var foo=e.hpGroup;
 			var bar=e.posGroup;
-			var baz=e.haxeIoBytes;
 			assertTrue(true);
 		}catch(e: Dynamic){
 			trace(e);
@@ -73,15 +73,58 @@ class TestAddingFieldsForGroups extends TestCase{
 	}
 }
 
+class TestAddingGroupGetters extends TestCase{
+
+	public function testHasIndividualComponents(){
+		var e: SimpleEntity=new SimpleEntity();
+		try{
+			var hp=e.hp;
+			var maxHp=e.maxHp;
+			var x=e.x;
+			var y=e.y;
+			assertTrue(true);
+		}catch(e: Dynamic){
+			trace(e);
+			assertTrue(false);
+		}
+	}
+
+	public function testGroupGetter(){
+		var e: SimpleEntity=new SimpleEntity();
+		e.x=new IntWrapper(10);
+		e.y=new IntWrapper(20);
+		e.hp=new IntWrapper(30);
+		e.maxHp=new IntWrapper(40);
+		var pg=e.posGroup;
+		var hg=e.hpGroup;
+		assertTrue(pg.x.equals(new IntWrapper(10)));
+		assertTrue(pg.y.equals(new IntWrapper(20)));
+		assertTrue(hg.hp.equals(new IntWrapper(30)));
+		assertTrue(hg.maxHp.equals(new IntWrapper(40)));
+	}
+
+	public function testCanChangeComponentsThroughGroups(){
+		var e: SimpleEntity=new SimpleEntity();
+		e.x=new IntWrapper(0);
+		e.y=new IntWrapper(0);
+		var pg=e.posGroup;
+		pg.x.val=(10);
+		pg.y.val=(20);
+		assertTrue(e.x.equals(new IntWrapper(10)));
+		assertTrue(e.y.equals(new IntWrapper(20)));
+	}
+}
+
 class HpGroup extends Group{
 	public var hp: IntWrapper;
 	public var maxHp: IntWrapper;
 
-	public function new(owner: Entity, maxHp: IntWrapper){
+	//TODO: add support for custom constructors later!
+	/*public function new(owner: Entity, maxHp: IntWrapper){
 		super(owner);
 		this.maxHp=maxHp;
 		this.hp=maxHp;
-	}
+	}*/
 }
 
 class PosGroup extends Group{
@@ -89,7 +132,7 @@ class PosGroup extends Group{
 	public var y: IntWrapper;
 }
 
-@has("HpGroup", "PosGroup", "haxe.io.Bytes")
+@has("HpGroup", "PosGroup")
 class SimpleEntity extends Entity{
 	
 }
@@ -101,5 +144,9 @@ class IntWrapper{
 
 	public function new(val: Int){
 		this.val=val;
+	}
+
+	public function equals(other: IntWrapper){
+		return this.val==other.val;
 	}
 }

@@ -110,13 +110,6 @@ class Macro{
 						}),
 						pos: Context.currentPos()
 					},
-					/*expr: EReturn({
-						expr: {
-							expr: ENew(tp, constrArgs), 
-							pos: Context.currentPos()
-						}, 
-						pos: Context.currentPos()
-					}),*/
 					args: []
 				})
 			});
