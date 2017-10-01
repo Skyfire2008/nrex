@@ -22,6 +22,19 @@ class Macro{
 	private static var groupFields: StringMap<Array<Field>>=new StringMap<Array<Field>>();
 
 	/**
+	 * Builds the game object:
+	 * 		1)Adds instances of all subclasses of System as private fields
+	 * 		2)Adds an update method
+	 */
+	macro public static function buildGame(): Array<Field>{
+		var fields: Array<Field>=Context.getBuildFields();
+		
+		//var systemType=Context.getType("nrex.core.System");
+
+		return fields;
+	}
+
+	/**
 	 * Builds an entity:
 	 * 		1)Every group an entity has is added as a field with getter
 	 * 		2)Components(variable fields) of groups that entity has are combined together

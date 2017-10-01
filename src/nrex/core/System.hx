@@ -7,7 +7,7 @@ class System<T: Group>{
 	private var groups: LinkedList<T>;
 
 	public function new(){
-		groups=new LinkedList<T>;
+		groups=new LinkedList<T>();
 	}
 
 	public function add(group: T){

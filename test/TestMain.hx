@@ -4,6 +4,7 @@ import haxe.unit.TestCase;
 import nrex.core.Entity;
 import nrex.core.Group;
 import nrex.core.Macro;
+import nrex.core.Game;
 
 /**
  * Test class
@@ -18,6 +19,7 @@ class TestMain{
 		runner.add(new TestAddingFieldsForGroups());
 		runner.add(new TestAddingConstructorsToGroups());
 		runner.add(new TestAddingGroupGetters());
+		runner.add(new TestBuildingGame());
 
 		runner.run();
 	}
@@ -112,6 +114,14 @@ class TestAddingGroupGetters extends TestCase{
 		pg.y.val=(20);
 		assertTrue(e.x.equals(new IntWrapper(10)));
 		assertTrue(e.y.equals(new IntWrapper(20)));
+	}
+}
+
+class TestBuildingGame extends TestCase{
+
+	public function testBuildsGame(){
+		var g: Game=new Game();
+		assertTrue(true);
 	}
 }
 
