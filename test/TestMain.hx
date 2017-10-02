@@ -4,6 +4,7 @@ import haxe.unit.TestCase;
 import nrex.core.Entity;
 import nrex.core.Group;
 import nrex.core.Macro;
+import nrex.core.System;
 import nrex.core.Game;
 
 /**
@@ -140,6 +141,10 @@ class HpGroup extends Group{
 class PosGroup extends Group{
 	public var x: IntWrapper;
 	public var y: IntWrapper;
+}
+
+class PosSystem extends System<PosGroup>{
+	
 }
 
 @has("HpGroup", "PosGroup")

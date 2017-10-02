@@ -30,6 +30,7 @@ class Macro{
 		var fields: Array<Field>=Context.getBuildFields();
 		
 		//var systemType=Context.getType("nrex.core.System");
+		trace(Context.getClassPath());
 
 		return fields;
 	}
