@@ -118,6 +118,10 @@ class TestAddingGroupGetters extends TestCase{
 	}
 }
 
+class HpSystem extends System<HpGroup>{
+	
+}
+
 class TestBuildingGame extends TestCase{
 
 	public function testBuildsGame(){

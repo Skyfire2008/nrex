@@ -6,12 +6,18 @@ import haxe.macro.Context;
 import haxe.macro.Expr;
 import haxe.macro.Type;
 
+import sys.io.File;
+import sys.FileSystem;
+import haxe.io.Path;
+
 using haxe.macro.MacroStringTools;
 using haxe.macro.TypeTools;
 using haxe.macro.ExprTools;
 
 using Lambda;
 using StringTools;
+
+using nrex.util.Extensions;
 
 class Macro{
 
@@ -31,7 +37,48 @@ class Macro{
 		
 		//var systemType=Context.getType("nrex.core.System");
 		trace(Context.getClassPath());
+		
+		Context.getLocalClass().get().meta.extract(":systemLocation")[0].params.iter(function(path){
+			trace(findSubClasses(path.getValue(), "", [], Context.getType("nrex.core.System").getClass()));
+		});
+		
+		/*Context.onAfterTyping(function(modules: Array<ModuleType> ){
+			var systemTypes: Array<ClassType> = new Array<ClassType>();
+			
+			//iterate through modules to get System subclasses and add them to the array
+			modules.iter(function(m){
+				switch(m){
+					case TClassDecl(c):
+						var cl = c.get();
+						var superClass = cl.superClass;
+						if (superClass != null){
+							if (superClass.t.get().module.indexOf("nrex.core.System") == 0){
+								systemTypes.push(cl);
+							}
+						}
+					default:
+				}
+			});
+			
+			Context.defineType({
+				fields: [],
+				isExtern: false,
+				kind: TDClass(null, [], false),
+				meta: null,
+				name: "Dummy",
+				pack: ["nrex", "core", "Dummy"],
+				params: null,
+				pos: Context.currentPos()
+			});
+			
+		});*/
 
+		return fields;
+	}
+	
+	macro public static function buildSystem(): Array<Field>{
+		var fields: Array<Field> = Context.getBuildFields();
+		
 		return fields;
 	}
 
@@ -188,7 +235,53 @@ class Macro{
 
 		return fields;
 	}
+	
+	//TODO: use something like path2ClassPath: "nrex/core/Entity.hx" -> "nrex.core.Entity"
+	
+#if macro
+	/**
+	 * Recursively finds subclasses of a certain class in a given folder
+	 * 
+	 * @param	path				current path to files
+	 * @param	classPath			current classPath
+	 * @param	interResult			intermediate results
+	 * @param	sup					superclass
+	 * 
+	 * @return						array of correct classTypes
+	 */
+	private static function findSubClasses(path: String, classPath: String, interResult: Array<ClassType>, sup: ClassType): Array<ClassType>{
+		
+		if (FileSystem.isDirectory(path)){ //if path is a directory
+			FileSystem.readDirectory(path).iter(function(name: String){ //aply findSubClasses to its files recursively
+				interResult=interResult.concat(findSubClasses(Path.join([path, name]), classPath.length==0 ? name : classPath+'.$name', [], sup));
+			});
+			
+		}else{ //if path is a file
+			if (path.endsWith(".hx")){
+				Context.getModule(classPath.substring(0, classPath.length - 3)).iter(function(t){ //get the module
+					
+					switch(t){ //match with type instance(TInst)
+						case TInst(ref, _):
+							var ct = ref.get();
+							if (ct.superClass != null){
+								var curSup = ct.superClass.t.get();
+								if (curSup.name.equals(sup.name) && curSup.pack.toString().equals(sup.pack.toString())){
+									interResult.push(ct);
+								}
+							}
+						default:
+					}
+				});
+				//interResult=interResult.concat();
+			}
+		}
+		
+		return interResult;
+		
+	}
+#end
 
+#if macro
 	/**
 	 * Converts ClassFields to build Fields
 	 */
@@ -203,6 +296,7 @@ class Macro{
 		};
 		return result;
 	}
+#end
 
 	//TODO: instead consider using name of the class
 	/**
