@@ -27,52 +27,38 @@ class Macro{
 	 */
 	private static var groupFields: StringMap<Array<Field>>=new StringMap<Array<Field>>();
 
+	//TODO: @:unused and @:name metadata for systems
 	/**
 	 * Builds the game object:
 	 * 		1)Adds instances of all subclasses of System as private fields
 	 * 		2)Adds an update method
 	 */
 	macro public static function buildGame(): Array<Field>{
-		var fields: Array<Field>=Context.getBuildFields();
+		var fields: Array<Field> = Context.getBuildFields();
 		
-		//var systemType=Context.getType("nrex.core.System");
-		trace(Context.getClassPath());
-		
+		//get all systems
+		var systemTypes = [];
 		Context.getLocalClass().get().meta.extract(":systemLocation")[0].params.iter(function(path){
-			trace(findSubClasses(path.getValue(), "", [], Context.getType("nrex.core.System").getClass()));
+			systemTypes=systemTypes.concat(findSubClasses(path.getValue(), "", [], Context.getType("nrex.core.System").getClass()));
 		});
 		
-		/*Context.onAfterTyping(function(modules: Array<ModuleType> ){
-			var systemTypes: Array<ClassType> = new Array<ClassType>();
-			
-			//iterate through modules to get System subclasses and add them to the array
-			modules.iter(function(m){
-				switch(m){
-					case TClassDecl(c):
-						var cl = c.get();
-						var superClass = cl.superClass;
-						if (superClass != null){
-							if (superClass.t.get().module.indexOf("nrex.core.System") == 0){
-								systemTypes.push(cl);
-							}
-						}
-					default:
-				}
+		trace(systemTypes);
+		
+		//add an instance of every system as a field
+		systemTypes.iter(function(t){
+			fields.push({
+				name: makeVarName(t.name),
+				pos: Context.currentPos(),
+				access: [APrivate],
+				kind: FVar(TPath({ //pretty much a copy of TypeTools.toTypePath
+					name: t.module.substring(t.module.lastIndexOf(".") + 1),
+					pack: t.pack,
+					sub: t.name,
+					params: t.params.map(function(p){ return TPType(p.t.toComplexType()); })
+				}), null)
 			});
-			
-			Context.defineType({
-				fields: [],
-				isExtern: false,
-				kind: TDClass(null, [], false),
-				meta: null,
-				name: "Dummy",
-				pack: ["nrex", "core", "Dummy"],
-				params: null,
-				pos: Context.currentPos()
-			});
-			
-		});*/
-
+		});
+		
 		return fields;
 	}
 	
