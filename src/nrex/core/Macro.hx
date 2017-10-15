@@ -59,6 +59,14 @@ class Macro{
 			});
 		});
 		
+		var sysCompoMap: Map<ClassType, Type> = new Map<ClassType, Type>();
+		
+		//get all components, that  the systems deal with
+		systemTypes.iter(function(t){
+			sysCompoMap.set(t, t.superClass.params[0]); //take the first element of the params array, since systems only accept one component type each
+		});
+		trace(sysCompoMap);
+		
 		return fields;
 	}
 	
