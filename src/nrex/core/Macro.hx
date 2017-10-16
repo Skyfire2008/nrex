@@ -42,11 +42,15 @@ class Macro{
 			systemTypes=systemTypes.concat(findSubClasses(path.getValue(), "", [], Context.getType("nrex.core.System").getClass()));
 		});
 		
-		trace(systemTypes);
+		//trace(systemTypes);
 		
 		//add an instance of every system as a field
 		systemTypes.iter(function(t){
-			fields.push({
+
+			var sysName=makeVarName(t.name);
+			var grType=t.superClass.params[0].toComplexType();
+
+			fields.push({ //add a system instance
 				name: makeVarName(t.name),
 				pos: Context.currentPos(),
 				access: [APrivate],
@@ -57,15 +61,38 @@ class Macro{
 					params: t.params.map(function(p){ return TPType(p.t.toComplexType()); })
 				}), null)
 			});
+
+			//create a function to add necessary component
+			var adder={
+				args: [],
+				expr: null,
+				params: null,
+				ret: grType
+			};
+
+			adder.args.push({ //function argument
+				name: "g",
+				opt: false,
+				type: grType
+			});
+
+			var test=macro $p{["g"]};
+			trace(test);
+
+			/*adder.expr={
+				expr: 
+				pos: Context.currentPos
+			}*/
+
 		});
 		
-		var sysCompoMap: Map<ClassType, Type> = new Map<ClassType, Type>();
+		/*var sysCompoMap: Map<ClassType, Type> = new Map<ClassType, Type>();
 		
 		//get all components, that  the systems deal with
 		systemTypes.iter(function(t){
-			sysCompoMap.set(t, t.superClass.params[0]); //take the first element of the params array, since systems only accept one component type each
+			//sysCompoMap.set(t, t.superClass.params[0]); //take the first element of the params array, since systems only accept one component type each
 		});
-		trace(sysCompoMap);
+		trace(sysCompoMap);*/
 		
 		return fields;
 	}
