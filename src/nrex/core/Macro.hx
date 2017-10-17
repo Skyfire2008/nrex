@@ -42,13 +42,12 @@ class Macro{
 			systemTypes=systemTypes.concat(findSubClasses(path.getValue(), "", [], Context.getType("nrex.core.System").getClass()));
 		});
 		
-		//trace(systemTypes);
-		
 		//add an instance of every system as a field
 		systemTypes.iter(function(t){
 
 			var sysName=makeVarName(t.name);
-			var grType=t.superClass.params[0].toComplexType();
+			var grType = t.superClass.params[0].toComplexType();
+			var grTypeName = t.superClass.params[0].getClass().name;
 
 			fields.push({ //add a system instance
 				name: makeVarName(t.name),
@@ -67,22 +66,29 @@ class Macro{
 				args: [],
 				expr: null,
 				params: null,
-				ret: grType
+				ret: Context.getType("Void").toComplexType()
 			};
-
+			
 			adder.args.push({ //function argument
-				name: "g",
+				name: "group",
 				opt: false,
 				type: grType
 			});
-
-			var test=macro $p{["g"]};
-			trace(test);
-
-			/*adder.expr={
-				expr: 
-				pos: Context.currentPos
-			}*/
+			
+			adder.expr={ //functon expression
+				expr: ECall(
+					macro $p{["this", sysName, "add"]},
+					[macro $i{"group"}]
+				),
+				pos: Context.currentPos()
+			}
+			
+			fields.push({
+				name: 'add$grTypeName',
+				pos: Context.currentPos(),
+				access: [APublic, AInline],
+				kind: FFun(adder)
+			});
 
 		});
 		

@@ -5,7 +5,6 @@ package nrex.core;
 class Game{
 
 	public function new(){
-
 	}
 
 }
