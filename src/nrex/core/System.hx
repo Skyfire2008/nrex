@@ -25,4 +25,15 @@ class System<T: Group>{
 	public function update(group: T){
 		throw "update method not implemented";
 	}
+	
+	public function updateAll(){
+		var newGroups: LinkedList<T> = new LinkedList<T>();
+		for (g in groups.iterator()){
+			this.update(g);
+			if (g.owner.alive){
+				newGroups.add(g);
+			}
+		}
+		groups = newGroups;
+	}
 }

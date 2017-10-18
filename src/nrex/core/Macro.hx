@@ -42,8 +42,9 @@ class Macro{
 			systemTypes=systemTypes.concat(findSubClasses(path.getValue(), "", [], Context.getType("nrex.core.System").getClass()));
 		});
 		
-		//add an instance of every system as a field
-		systemTypes.iter(function(t){
+		var sysPrios: Array<SysPrio> = new Array<SysPrio>();
+		
+		systemTypes.iter(function(t){ //for every system type...
 
 			var sysName=makeVarName(t.name);
 			var grType = t.superClass.params[0].toComplexType();
@@ -83,13 +84,24 @@ class Macro{
 				pos: Context.currentPos()
 			}
 			
-			fields.push({
+			fields.push({ //push the function to the fields
 				name: 'add$grTypeName',
 				pos: Context.currentPos(),
 				access: [APublic, AInline],
 				kind: FFun(adder)
 			});
+			
+			//get the priority of the system
+			var sp={sys: t, prio: 0}
+			if (t.meta.has(":priority")){
+				sp.prio = t.meta.extract(":priority")[0].params[0].getValue();
+			}
+			sysPrios.push(sp);
 
+		});
+		
+		sysPrios.sort(function(a, b): Int{
+			return a.prio - b.prio;
 		});
 		
 		/*var sysCompoMap: Map<ClassType, Type> = new Map<ClassType, Type>();
@@ -264,7 +276,6 @@ class Macro{
 	}
 	
 	//TODO: use something like path2ClassPath: "nrex/core/Entity.hx" -> "nrex.core.Entity"
-	
 #if macro
 	/**
 	 * Recursively finds subclasses of a certain class in a given folder
@@ -356,3 +367,11 @@ class Macro{
 	}
 
 }
+
+/**
+ * System-priority tuple for sorting
+ */
+typedef SysPrio = {
+	var sys: ClassType;
+	var prio: Int;
+};

@@ -118,6 +118,7 @@ class TestAddingGroupGetters extends TestCase{
 	}
 }
 
+@:priority(10)
 class HpSystem extends System<HpGroup>{
 	
 }
@@ -147,6 +148,7 @@ class PosGroup extends Group{
 	public var y: IntWrapper;
 }
 
+//@:priority(0)
 class PosSystem extends System<PosGroup>{
 	
 }
