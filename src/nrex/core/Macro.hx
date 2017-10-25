@@ -100,8 +100,63 @@ class Macro{
 
 		});
 		
+		//sort the systems by their priorities
 		sysPrios.sort(function(a, b): Int{
 			return a.prio - b.prio;
+		});
+		
+		//find out, which systems use which methods
+		var setupSys: Array<ClassType> = [];
+		var updateSys: Array<ClassType> = [];
+		var teardownSys: Array<ClassType> = [];
+		
+		sysPrios.iter(function(sp){
+			sp.sys.fields.get().iter(function(f){
+				
+				if (f.name.equals("setup")){
+					setupSys.push(sp.sys);
+				}else if (f.name.equals("update")){
+					updateSys.push(sp.sys);
+				}else if (f.name.equals("teardown")){
+					teardownSys.push(sp.sys);
+				}
+			});
+		});
+		
+		//generate calls to appropriate methods of the systems
+		var exprs: Array<Expr> = [];
+		
+		setupSys.iter(function(sys){
+			exprs.push({
+				expr: ECall(macro $p{["this", makeVarName(sys.name), "setup"]}, []),
+				pos: Context.currentPos()
+			});
+		});
+		
+		updateSys.iter(function(sys){
+			exprs.push({
+				expr: ECall(macro $p{["this", makeVarName(sys.name), "updateAll"]}, []),
+				pos: Context.currentPos()
+			});
+		});
+		
+		teardownSys.iter(function(sys){
+			exprs.push({
+				expr: ECall(macro $p{["this", makeVarName(sys.name), "teardown"]}, []),
+				pos: Context.currentPos()
+			});
+		});
+		
+		//add the calls to overriden update method of the game
+		fields.push({
+			name: "update",
+			pos: Context.currentPos(),
+			access: [APublic, AOverride],
+			kind: FFun({
+				args: [],
+				expr: macro $b{exprs},
+				ret: null
+			})
 		});
 		
 		/*var sysCompoMap: Map<ClassType, Type> = new Map<ClassType, Type>();

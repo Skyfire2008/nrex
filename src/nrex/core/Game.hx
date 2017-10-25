@@ -1,7 +1,6 @@
 package nrex.core;
 
-@:build(nrex.core.Macro.buildGame())
-@:systemLocation("test")
+@:autoBuild(nrex.core.Macro.buildGame())
 class Game{
 
 	public function new(){
@@ -9,7 +8,7 @@ class Game{
 	}
 	
 	/**
-	 * Updates the game state, will be filled by macro
+	 * Updates the game state, will be overriden by macro
 	 */
 	public function update(){
 		throw "Update method is not implemented";

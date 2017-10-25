@@ -118,15 +118,24 @@ class TestAddingGroupGetters extends TestCase{
 	}
 }
 
+@:systemLocation("test")
+class MyGame extends Game{
+	public function new(){
+		super();
+	}
+}
+
 @:priority(10)
 class HpSystem extends System<HpGroup>{
-	
+	public override function setup(){
+		
+	}
 }
 
 class TestBuildingGame extends TestCase{
 
 	public function testBuildsGame(){
-		var g: Game=new Game();
+		var g: MyGame = new MyGame();
 		assertTrue(true);
 	}
 }
@@ -150,6 +159,11 @@ class PosGroup extends Group{
 
 //@:priority(0)
 class PosSystem extends System<PosGroup>{
+	
+	public override function update(g: PosGroup){
+		g.x.val=g.x.val+1;
+		g.y.val=g.y.val+2;
+	}
 	
 }
 
