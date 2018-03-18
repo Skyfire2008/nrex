@@ -118,6 +118,16 @@ class TestAddingGroupGetters extends TestCase{
 	}
 }
 
+class TestBuildingGame extends TestCase{
+
+	public function testBuildsGame(){
+		var g: MyGame = new MyGame();
+		//var e=new SimpleEntity();
+		Macro.addEntity(g, new SimpleEntity());
+		assertTrue(true);
+	}
+}
+
 @:systemLocation("test")
 class MyGame extends Game{
 	public function new(){
@@ -129,14 +139,6 @@ class MyGame extends Game{
 class HpSystem extends System<HpGroup>{
 	public override function setup(){
 		
-	}
-}
-
-class TestBuildingGame extends TestCase{
-
-	public function testBuildsGame(){
-		var g: MyGame = new MyGame();
-		assertTrue(true);
 	}
 }
 
@@ -167,7 +169,8 @@ class PosSystem extends System<PosGroup>{
 	
 }
 
-@has("HpGroup", "PosGroup")
+@has("HpGroup", 
+	 "PosGroup")
 class SimpleEntity extends Entity{
 	
 }

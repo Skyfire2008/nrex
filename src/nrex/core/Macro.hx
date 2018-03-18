@@ -27,6 +27,46 @@ class Macro{
 	 */
 	private static var groupFields: StringMap<Array<Field>>=new StringMap<Array<Field>>();
 
+	/**
+	 * Number of last added entity
+	 */
+	private static var entNum: Int=0;
+
+	/**
+	 * Adds an entity to a game
+	 */
+	macro public static function addEntity(game: ExprOf<Game>, ent: ExprOf<Entity>){
+		
+		trace(game);
+		trace(ent);
+
+		var toAdd: Expr;
+
+		switch(ent.expr){
+			case EConst(_): //if a constant, don't do anything
+				toAdd=ent;
+
+			default: //otherwise, create a local variable
+				toAdd={
+					expr: EVars([{
+						expr: ent,
+						name: 'addedEntity$entNum',
+						type: null
+					}]),
+					pos: Context.currentPos()
+				};
+				entNum++;
+		}
+
+		//get all groups of the entity
+		var groups=Context.typeof(ent).getClass().meta.extract("has");
+		groups.iter(function(m){
+			trace(m.params);
+		});
+
+		return toAdd;
+	}
+
 	//TODO: @:unused and @:name metadata for systems
 	/**
 	 * Builds the game object:
@@ -192,6 +232,10 @@ class Macro{
 		var components: StringMap<Field>=new StringMap<Field>();
 
 		//FOR EVERY GROUP, ADD THE GROUP FIELD TO ENTITY AND COMPONENTS TO THE COMPONENTS SET
+		/*var params=currentClass.meta.extract("has").flatMap(function(entry){
+			return entry.params;
+		});*/
+
 		currentClass.meta.extract("has")[0].params.iter(function(param){
 			var name=param.getValue();
 			var type=Context.getType(name);
@@ -278,7 +322,8 @@ class Macro{
 
 		//add 
 
-		currentClass.meta.remove("has"); //remove metadata
+		//do not remove the metadata, it will be needed for addition of entities to game
+		//currentClass.meta.remove("has"); //remove metadata
 
 		return fields;
 	}

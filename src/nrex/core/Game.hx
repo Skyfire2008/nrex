@@ -1,5 +1,6 @@
 package nrex.core;
 
+//TODO: add metadata to add systems by their name and not location
 @:autoBuild(nrex.core.Macro.buildGame())
 class Game{
 
